@@ -2,17 +2,23 @@ import reqRes
 import re
 import webbrowser
 import subprocess
-
-
+import datetime
+from pyowm import OWM
 
 
 def assistant(command):
  
-# TODO: greet according to time
-
 #  conversation 
     if 'hello' in command:
-        reqRes.botResponse("Hello! What can I do for you?")
+        t = datetime.datetime.now()
+        if t.hour < 12:
+            greet = "Good Morning"
+        elif t.hour > 12 and t.hour < 18:
+            greet = "Good Afternoon"
+        else:
+            greet = "Good Evening"
+                
+        reqRes.botResponse("{}! What can I do for you?".format(greet))
     
     elif 'shutdown' in command:
         reqRes.botResponse("Enjoy your day!")
@@ -28,9 +34,39 @@ def assistant(command):
             reqRes.botResponse("Opening {}".format(domain))
         else:
             pass
+#   task 2 - Weather functionality
+    elif "current weather" in command:
+        reg_ex = re.search('current weather in (.+)', command)
+        if reg_ex: 
+            city = reg_ex.group(1)
+            owm = OWM('043c95bd84b2bbcdcf7404f634788f85')
+            mgr = owm.weather_manager()
+            obs = mgr.weather_at_place(city)
+            w = obs.weather
+            s = w.status()
+            t = w.temperature('celsius')
+            reqRes.botResponse('Current weather in %s is %s. The maximum temperature is %0.2f and the minimum temperature is %0.2f degree celcius' % (city, s, t['temp_max'], t['temp_min']))
 
-# TODO: Weather functionality
-# TODO: current time
+    elif "time" in command:
+        t = datetime.datetime.now()
+        h = t.hour
+        m = t.minute
+        s = t.second
+        res = 'The time is {} hours {} minutes and {} seconds.'.format(h,m,s)
+        print(res)
+        reqRes.botResponse(res)
+
+    elif "date" in command:
+        t = datetime.datetime.now()
+        d = t.day
+        m = t.month
+        y = t.year
+        res = 'Today is {}, {}, {}.'.format(d,m,y)
+        print(res)
+        reqRes.botResponse(res)
+
+
+
 # TODO: News feed
 # TODO: Search
 
